@@ -1,26 +1,42 @@
 "use client";
 import React, { Suspense, useEffect, useState, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
 import Lenis from "lenis";
 
-// Animated GLB Component
+// Animated GLB Component with Lenis scroll integration
 function AnimatedModel({ scrollProgress, ...props }: any) {
-  const { scene, animations } = useGLTF("/rill.glb");
-  const { actions, mixer } = useAnimations(animations, scene);
-  const mixerRef = useRef(mixer);
-  const actionsInitialized = useRef(false);
+  const { scene, animations } = useGLTF("/drill.glb");
+  const { actions, clips } = useAnimations(animations, scene);
+  const [fadeOpacity, setFadeOpacity] = useState(1);
+  const fadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const animationCompleteRef = useRef(false);
 
+  // Initialize actions on mount
   useEffect(() => {
-    mixerRef.current = mixer;
-  }, [mixer]);
+    console.log("Available actions:", Object.keys(actions));
+    console.log("Available clips:", clips);
 
-  // Remove platform only
+    // Initialize all actions - improved approach
+    Object.values(actions).forEach((action: any) => {
+      if (action) {
+        action.reset();
+        action.setLoop(THREE.LoopOnce, 1);
+        action.clampWhenFinished = true;
+        action.enabled = true;
+        action.play();
+        action.paused = true; // Start paused for scroll control
+        console.log("Action initialized:", action.getClip().name);
+      }
+    });
+  }, [actions, clips]);
+
+  // Remove platform and setup materials for fade effect
   useEffect(() => {
     if (scene) {
       scene.traverse((child: any) => {
-        // Remove platform/ground objects (common names)
+        // Remove platform/ground objects
         if (
           child.name &&
           (child.name.toLowerCase().includes("platform") ||
@@ -31,78 +47,74 @@ function AnimatedModel({ scrollProgress, ...props }: any) {
         ) {
           child.visible = false;
         }
+
+        // Setup materials for fade effect
+        if (child.isMesh && child.material) {
+          child.material.transparent = true;
+          child.material.needsUpdate = true;
+        }
       });
     }
   }, [scene]);
 
-  // Initialize actions only once
-  useEffect(() => {
-    if (!mixerRef.current || Object.keys(actions).length === 0) return;
+  // useFrame for smooth 60fps animation control
+  useFrame(() => {
+    // Use scrollProgress prop from Lenis instead of useScroll
+    const scrollOffset = scrollProgress || 0;
 
-    console.log("Initializing actions:", Object.keys(actions));
+    // Handle animation completion and delayed fade
+    if (scrollOffset >= 0.99 && !animationCompleteRef.current) {
+      animationCompleteRef.current = true;
+      console.log("Animation completed, starting 2-second delay before fade");
 
-    Object.values(actions).forEach((action: any) => {
-      if (action) {
-        action.reset();
-        action.setLoop(THREE.LoopOnce, 1);
-        action.clampWhenFinished = true;
-        action.enabled = true;
-        action.play();
-        action.paused = true;
-        console.log("Action initialized:", action.getClip().name);
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+      }
+
+      fadeTimeoutRef.current = setTimeout(() => {
+        console.log("Starting fade out");
+        let currentOpacity = 1;
+        const fadeInterval = setInterval(() => {
+          currentOpacity -= 0.05;
+          if (currentOpacity <= 0) {
+            currentOpacity = 0;
+            clearInterval(fadeInterval);
+            console.log("Fade out complete");
+          }
+          setFadeOpacity(currentOpacity);
+        }, 50);
+      }, 2000);
+    } else if (scrollOffset < 0.99) {
+      animationCompleteRef.current = false;
+      setFadeOpacity(1);
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+        fadeTimeoutRef.current = null;
+      }
+    }
+
+    // Apply fade opacity to materials
+    scene.traverse((child: any) => {
+      if (child.isMesh && child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach((mat: any) => {
+            mat.opacity = fadeOpacity;
+          });
+        } else {
+          child.material.opacity = fadeOpacity;
+        }
       }
     });
 
-    actionsInitialized.current = true;
-  }, [actions, mixer]);
-
-  // Scroll-based animation update with fallback
-  useEffect(() => {
-    console.log("Scroll effect triggered:", scrollProgress);
-    console.log("Mixer exists:", !!mixerRef.current);
-    console.log("Actions count:", Object.keys(actions).length);
-    console.log("Actions initialized:", actionsInitialized.current);
-
-    if (!mixerRef.current) return;
-
-    // If no animations, just rotate the model based on scroll as fallback
-    if (Object.keys(actions).length === 0) {
-      console.log("No animations found, using rotation fallback");
-      if (scene) {
-        scene.rotation.x = scrollProgress * Math.PI * 0.2; // Slight pitch
-        scene.rotation.z = scrollProgress * Math.PI * 0.1; // Slight roll
-      }
-      return;
-    }
-
-    if (!actionsInitialized.current) return;
-
-    // Animation control with loop back to start
+    // Control animation based on scroll - improved performance
     Object.values(actions).forEach((action: any) => {
       if (action) {
         const duration = action.getClip().duration;
-        // Create a loop: 0-50% scroll = 0-100% animation, 50-100% scroll = 100-0% animation
-        let animationProgress;
-        if (scrollProgress <= 0.5) {
-          // First half: play forward
-          animationProgress = scrollProgress * 2; // 0 to 1
-        } else {
-          // Second half: play backward
-          animationProgress = 2 - scrollProgress * 2; // 1 to 0
-        }
-
-        action.time = animationProgress * duration;
-        console.log(
-          "Animation progress:",
-          animationProgress,
-          "Action time:",
-          action.time
-        );
+        // Direct scroll offset mapping for smooth animation
+        action.time = scrollOffset * duration;
       }
     });
-
-    mixerRef.current.update(0);
-  }, [scrollProgress, actions, scene]);
+  });
 
   return <primitive object={scene} {...props} />;
 }
@@ -113,33 +125,49 @@ export default function App() {
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
-    // Initialize Lenis with optimized settings
+    // Initialize Lenis with scroll speed limiting
     const lenis = new Lenis({
-      duration: 1.8,
-      easing: (t) => 1 - Math.pow(1 - t, 3),
+      duration: 2.5, // Increased duration for slower scrolling
+      easing: (t) => 1 - Math.pow(1 - t, 5), // Even stronger easing to prevent fast scrolling
       smoothWheel: true,
-      wheelMultiplier: 0.8,
-      touchMultiplier: 1.5,
+      wheelMultiplier: 0.3, // Much lower for slower scroll response
+      touchMultiplier: 0.8, // Reduced touch sensitivity
       infinite: false,
       syncTouch: true,
-      syncTouchLerp: 0.1,
+      syncTouchLerp: 0.02, // Very low for minimal momentum
     });
 
     lenisRef.current = lenis;
 
-    // Lenis scroll event with proper calculation
+    // Lenis scroll event with stability fix
     lenis.on("scroll", (e: any) => {
       const { scroll, limit } = e;
-      // Ensure limit is not 0 to avoid division by zero
-      const scrollPercent = limit > 0 ? scroll / limit : 0;
+
+      if (limit <= 0) {
+        setScrollProgress(0);
+        return;
+      }
+
+      let scrollPercent = scroll / limit;
+
+      // Add stability at the end range to prevent jumping
+      if (scrollPercent >= 0.98) {
+        scrollPercent = 1; // Lock to 100% when very close
+      } else if (scrollPercent <= 0.02) {
+        scrollPercent = 0; // Lock to 0% when very close to start
+      }
+
       const clampedProgress = Math.min(Math.max(scrollPercent, 0), 1);
       setScrollProgress(clampedProgress);
+
       console.log(
         "Scroll values - scroll:",
         scroll,
         "limit:",
         limit,
-        "progress:",
+        "raw progress:",
+        scroll / limit,
+        "final progress:",
         clampedProgress
       );
     });
@@ -166,7 +194,7 @@ export default function App() {
     <div className="relative">
       {/* Fixed Canvas Container */}
       <div className="fixed inset-0 w-screen h-screen bg-black z-10">
-        <Canvas camera={{ position: [0, 4, 10], fov: 40 }}>
+        <Canvas camera={{ position: [0, 5, 13], fov: 38 }}>
           {/* Simple normal lighting */}
           <ambientLight intensity={0.5} />
           <directionalLight position={[3, 3, 3]} intensity={1} />
@@ -174,7 +202,7 @@ export default function App() {
           <Suspense fallback={null}>
             <AnimatedModel
               scrollProgress={scrollProgress}
-              position={[0, 0, 0]}
+              position={[0, -0.3, 0]}
               rotation={[0, Math.PI, 0]}
             />
           </Suspense>
