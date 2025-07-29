@@ -1,11 +1,11 @@
 "use client";
 import React, { Suspense, useEffect, useState, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, useGLTF, useAnimations } from "@react-three/drei";
+import { useGLTF, useAnimations } from "@react-three/drei";
 import * as THREE from "three";
 import Lenis from "lenis";
 
-// Animated GLB Component with Lenis scroll integration
+// Animated GLB Component synchronized with Lenis scroll
 function AnimatedModel({ scrollProgress, ...props }: any) {
   const { scene, animations } = useGLTF("/drill.glb");
   const { actions, clips } = useAnimations(animations, scene);
@@ -57,10 +57,17 @@ function AnimatedModel({ scrollProgress, ...props }: any) {
     }
   }, [scene]);
 
-  // useFrame for smooth 60fps animation control
+  // useFrame for smooth 60fps animation control synchronized with Lenis scroll
   useFrame(() => {
-    // Use scrollProgress prop from Lenis instead of useScroll
+    // Use scrollProgress prop from Lenis (0 to 1)
     const scrollOffset = scrollProgress || 0;
+
+    console.log(
+      "Scroll offset:",
+      scrollOffset,
+      "Actions count:",
+      Object.keys(actions).length
+    );
 
     // Handle animation completion and delayed fade
     if (scrollOffset >= 0.99 && !animationCompleteRef.current) {
@@ -106,12 +113,13 @@ function AnimatedModel({ scrollProgress, ...props }: any) {
       }
     });
 
-    // Control animation based on scroll - improved performance
+    // Control animation based on Lenis scroll progress - SYNCHRONIZED
     Object.values(actions).forEach((action: any) => {
       if (action) {
         const duration = action.getClip().duration;
-        // Direct scroll offset mapping for smooth animation
+        // Direct mapping: scroll progress controls animation time
         action.time = scrollOffset * duration;
+        console.log("Setting action time:", action.time, "Duration:", duration);
       }
     });
   });
@@ -119,7 +127,7 @@ function AnimatedModel({ scrollProgress, ...props }: any) {
   return <primitive object={scene} {...props} />;
 }
 
-// Canvas with lighting and controls
+// Canvas with Lenis scroll integration
 export default function App() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const lenisRef = useRef<Lenis | null>(null);
@@ -161,14 +169,12 @@ export default function App() {
       setScrollProgress(clampedProgress);
 
       console.log(
-        "Scroll values - scroll:",
+        "Lenis scroll - progress:",
+        clampedProgress,
+        "scroll:",
         scroll,
         "limit:",
-        limit,
-        "raw progress:",
-        scroll / limit,
-        "final progress:",
-        clampedProgress
+        limit
       );
     });
 
@@ -194,7 +200,65 @@ export default function App() {
     <div className="relative">
       {/* Fixed Canvas Container */}
       <div className="fixed inset-0 w-screen h-screen bg-black z-10">
-        <Canvas camera={{ position: [0, 5, 13], fov: 38 }}>
+        <Canvas
+          camera={{ position: [0, 3, 10], fov: 50 }}
+          style={{
+            pointerEvents: "none",
+            touchAction: "none",
+            userSelect: "none",
+            outline: "none",
+          }}
+          tabIndex={-1}
+          onPointerMove={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onPointerUp={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onWheel={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onMouseMove={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onMouseUp={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onTouchStart={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onTouchMove={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onFocus={(e) => {
+            e.preventDefault();
+            e.target.blur();
+          }}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          gl={{ preserveDrawingBuffer: false }}
+        >
           {/* Simple normal lighting */}
           <ambientLight intensity={0.5} />
           <directionalLight position={[3, 3, 3]} intensity={1} />
@@ -206,8 +270,6 @@ export default function App() {
               rotation={[0, Math.PI, 0]}
             />
           </Suspense>
-
-          <OrbitControls enableZoom={false} enablePan={false} />
         </Canvas>
       </div>
 
@@ -217,7 +279,7 @@ export default function App() {
         {/* 5x viewport height for scroll space */}
       </div>
 
-      {/* Optional: Scroll Progress Indicator */}
+      {/* Scroll Progress Indicator */}
       <div className="fixed top-4 left-4 z-30 text-white bg-black/50 px-3 py-1 rounded">
         Scroll: {Math.round(scrollProgress * 100)}%
       </div>
