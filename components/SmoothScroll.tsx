@@ -10,7 +10,7 @@ export default function SmoothScroll({
     <ReactLenis
       root
       options={{
-        lerp:0.01,
+        lerp:0.04,
       }}
     >
       {children}
