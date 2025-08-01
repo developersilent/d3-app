@@ -43,20 +43,11 @@ export default function FeatureCard({
     <motion.div
       className="group cursor-pointer"
       variants={fadeInVariants}
-      whileHover={{ y: -12, rotateY: 2 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       <div className="relative h-full perspective-1000">
-        {/* Multi-layer glow system */}
-        <div
-          className={`absolute -inset-2 bg-gradient-to-br ${colorScheme.primary}/20 via-${colorScheme.secondary}/10 to-${colorScheme.accent}/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-1000`}
-        ></div>
-        <div
-          className={`absolute -inset-1 bg-gradient-to-br ${colorScheme.primary}/30 to-${colorScheme.accent}/30 rounded-3xl blur-xl opacity-0 group-hover:opacity-70 transition-all duration-700`}
-        ></div>
-
+       
         {/* Card with advanced materials */}
-        <div className="relative h-full bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-3xl border border-slate-700/40 rounded-3xl overflow-hidden shadow-2xl group-hover:border-blue-400/60 group-hover:shadow-blue-500/10 transition-all duration-500">
+        <div className="relative h-full rounded-3xl overflow-hidden">
           {/* Animated border system */}
           <div className="absolute inset-0 rounded-3xl overflow-hidden">
             <div

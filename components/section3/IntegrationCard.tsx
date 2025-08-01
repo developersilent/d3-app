@@ -18,13 +18,8 @@ export default function IntegrationCard() {
     <motion.div
       className="group cursor-pointer"
       variants={fadeInVariants}
-      whileHover={{ y: -12, rotateY: 2 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       <div className="relative h-full perspective-1000">
-        {/* Multi-layer glow system */}
-        <div className="absolute -inset-2 bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-indigo-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-1000"></div>
-        <div className="absolute -inset-1 bg-gradient-to-br from-blue-400/30 to-indigo-400/30 rounded-3xl blur-xl opacity-0 group-hover:opacity-70 transition-all duration-700"></div>
 
         {/* Card with advanced materials */}
         <div className="relative h-full bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-3xl border border-slate-700/40 rounded-3xl overflow-hidden shadow-2xl group-hover:border-blue-400/60 group-hover:shadow-blue-500/10 transition-all duration-500">
@@ -38,7 +33,7 @@ export default function IntegrationCard() {
           <div className="relative p-8 lg:p-10">
             {/* Icon with sophisticated design */}
             <div className="mb-8 relative">
-              <div className="relative w-16 h-16 bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-blue-600/15 rounded-2xl border border-blue-400/20 flex items-center justify-center backdrop-blur-sm group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg">
+              <div className="relative w-16 h-16 bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-blue-600/15 rounded-2xl border border-blue-400/20 flex items-center justify-center backdrop-blur-sm group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-2xl blur-sm"></div>
                 <svg
                   className="relative w-8 h-8 text-blue-300 group-hover:text-blue-200 transition-colors duration-300"

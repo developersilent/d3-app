@@ -18,21 +18,10 @@ export default function AnalyticsCard() {
     <motion.div
       className="group cursor-pointer"
       variants={fadeInVariants}
-      whileHover={{ y: -12, rotateY: -2 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       <div className="relative h-full perspective-1000">
-        {/* Multi-layer glow system */}
-        <div className="absolute -inset-2 bg-gradient-to-br from-cyan-500/20 via-teal-500/10 to-emerald-500/20 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-1000"></div>
-        <div className="absolute -inset-1 bg-gradient-to-br from-cyan-400/30 to-emerald-400/30 rounded-3xl blur-xl opacity-0 group-hover:opacity-70 transition-all duration-700"></div>
-
         {/* Card with advanced materials */}
         <div className="relative h-full bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-3xl border border-slate-700/40 rounded-3xl overflow-hidden shadow-2xl group-hover:border-cyan-400/60 group-hover:shadow-cyan-500/10 transition-all duration-500">
-          {/* Animated border system */}
-          <div className="absolute inset-0 rounded-3xl overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent"></div>
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent"></div>
-          </div>
 
           {/* Content with advanced spacing */}
           <div className="relative p-8 lg:p-10">

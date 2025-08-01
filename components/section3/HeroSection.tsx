@@ -103,7 +103,7 @@ export default function HeroSection() {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative flex items-center gap-2">
-                <span>Start Free Trial</span>
+                <span>Explore</span>
                 <svg
                   className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
                   fill="none"
@@ -119,32 +119,7 @@ export default function HeroSection() {
                 </svg>
               </div>
             </motion.button>
-
-            <motion.button
-              className="group flex items-center gap-3 px-6 py-4 text-slate-300 hover:text-white transition-colors duration-300"
-              whileHover={{ x: 4 }}
-            >
-              <div className="w-12 h-12 bg-slate-800/50 border border-slate-600/50 rounded-full flex items-center justify-center backdrop-blur-xl group-hover:bg-slate-700/50 group-hover:border-slate-500/50 transition-all duration-300">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.5a2.5 2.5 0 110 5H9V10z"
-                  />
-                </svg>
-              </div>
-              <div className="text-left">
-                <div className="font-semibold">Watch Demo</div>
-                <div className="text-sm text-slate-500">2 min overview</div>
-              </div>
-            </motion.button>
-          </motion.div>
+            </motion.div>
         </motion.div>
 
         {/* Right Visual Element */}

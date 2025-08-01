@@ -20,7 +20,9 @@ export default function CTASection() {
         className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-6"
         variants={fadeInVariants}
       >
-        <motion.button
+        <motion.a
+        href="https://pitch-a-thon-app.vercel.app/"
+        target="_blank"
           className="group relative px-8 py-4 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600 text-white rounded-2xl font-semibold text-base shadow-2xl hover:shadow-blue-500/25 transition-all duration-500 overflow-hidden"
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.98 }}
@@ -43,31 +45,7 @@ export default function CTASection() {
               />
             </svg>
           </div>
-        </motion.button>
-
-        <motion.button
-          className="group relative px-8 py-4 bg-slate-800/50 border border-slate-600/50 text-slate-200 rounded-2xl font-semibold text-base backdrop-blur-xl hover:bg-slate-700/50 hover:border-slate-500/50 transition-all duration-300"
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
-        >
-          <div className="flex items-center gap-2">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.5a2.5 2.5 0 110 5H9V10z"
-              />
-            </svg>
-            <span>Watch Demo</span>
-          </div>
-        </motion.button>
+        </motion.a>
       </motion.div>
 
       {/* Trust indicators */}
